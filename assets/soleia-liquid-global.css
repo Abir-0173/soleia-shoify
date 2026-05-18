@@ -1,0 +1,58 @@
+/* ==========================================================================
+   Soleia — Global Liquid Effect
+   assets/soleia-liquid-global.css
+   ========================================================================== */
+
+/* ── Fixed full-viewport canvas overlay ── */
+#slg-canvas {
+  position: fixed;
+  inset: 0;
+  width:  100vw !important;
+  height: 100vh !important;
+  z-index: 9999;
+
+  /* Clicks / hovers pass straight through to your page */
+  pointer-events: none;
+
+  display: block;
+
+  /* Default blend — overridden inline by JS from customizer value */
+  mix-blend-mode: screen;
+  opacity: 0.55;
+
+  /* GPU layer — prevents paint flicker on scroll */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* ── Cursor — always visible on every element ── */
+html, body                             { cursor: auto; }
+a, button, [role="button"],
+[type="submit"], [type="button"],
+label, summary, select,
+.btn, .button, [data-action]           { cursor: pointer; }
+input[type="text"],
+input[type="email"],
+input[type="search"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="url"],
+textarea                               { cursor: text; }
+[disabled], [aria-disabled="true"]     { cursor: not-allowed; }
+input[type="range"]                    { cursor: grab; }
+input[type="range"]:active             { cursor: grabbing; }
+
+/* ── Mobile: drop z-index so Shopify cart drawer / menus sit on top ── */
+@media screen and (max-width: 768px) {
+  #slg-canvas {
+    z-index: 999;
+    /* Tone down on mobile — less intrusive on smaller screens */
+    opacity: 0.4 !important;
+  }
+}
+
+/* ── Accessibility — hide entirely for reduced-motion users ── */
+@media (prefers-reduced-motion: reduce) {
+  #slg-canvas { display: none !important; }
+}

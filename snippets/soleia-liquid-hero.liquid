@@ -1,0 +1,183 @@
+{% comment %}
+  ============================================================
+  SOLEIA — Liquid Hero Snippet
+  File: snippets/soleia-liquid-hero.liquid
+
+  Usage:
+  {% render 'soleia-liquid-hero',
+      heading:      'A new format for modern tea',
+      subheading:   'Plastic-free tea strips that dissolve in seconds.',
+      cta_label:    'Join the Waitlist',
+      cta_url:      '#waitlist',
+      bg_color:     '#1a0e08',
+      metalness:    0.75,
+      roughness:    0.25,
+      displacement: 5
+  %}
+  ============================================================
+{% endcomment %}
+
+{{ 'soleia-liquid-hero-snippet.css' | asset_url | stylesheet_tag }}
+
+{% render 'soleia-liquid-hero',
+    heading: 'A new format for modern tea',
+    subheading: 'Plastic-free tea strips...',
+    cta_label: 'Join the Waitlist',
+    bg_color: '#1a0e08',
+    metalness: 0.75,
+    displacement: 5
+%}
+
+{%- liquid
+  assign hero_heading     = heading     | default: 'A new format for modern tea'
+  assign hero_subheading  = subheading  | default: 'Plastic-free tea strips that dissolve in seconds. Pure flavour, functional botanicals, zero waste'
+  assign hero_cta_label   = cta_label   | default: 'Join the Waitlist'
+  assign hero_cta_url     = cta_url     | default: '#waitlist'
+  assign hero_bg_color    = bg_color    | default: '#1a0e08'
+  assign hero_metalness   = metalness   | default: 0.75
+  assign hero_roughness   = roughness   | default: 0.25
+  assign hero_displacement = displacement | default: 5
+  assign hero_unique_id   = 'slh-' | append: section.id
+-%}
+
+<div
+  class="slh-snippet"
+  id="{{ hero_unique_id }}"
+  data-heading="{{ hero_heading | escape }}"
+  data-subheading="{{ hero_subheading | escape }}"
+  data-bg-color="{{ hero_bg_color }}"
+  data-metalness="{{ hero_metalness }}"
+  data-roughness="{{ hero_roughness }}"
+  data-displacement="{{ hero_displacement }}"
+  {%- if bg_image != blank -%}
+    data-bg-image="{{ bg_image | image_url: width: 1800 }}"
+  {%- endif -%}
+>
+  <canvas class="slh-snippet__canvas" aria-hidden="true"></canvas>
+
+  <div class="slh-snippet__ui">
+    {%- if hero_cta_label != blank -%}
+      <a href="{{ hero_cta_url }}" class="slh-snippet__cta">
+        {{- hero_cta_label -}}
+      </a>
+    {%- endif -%}
+  </div>
+</div>
+
+<script type="module">
+(function () {
+  var wrap = document.getElementById('{{ hero_unique_id }}');
+  if (!wrap) return;
+  var canvas = wrap.querySelector('.slh-snippet__canvas');
+
+  var CFG = {
+    heading:      wrap.dataset.heading      || '',
+    subheading:   wrap.dataset.subheading   || '',
+    bgColor:      wrap.dataset.bgColor      || '#1a0e08',
+    bgImage:      wrap.dataset.bgImage      || '',
+    metalness:    parseFloat(wrap.dataset.metalness    || 0.75),
+    roughness:    parseFloat(wrap.dataset.roughness    || 0.25),
+    displacement: parseFloat(wrap.dataset.displacement || 5)
+  };
+
+  function buildTexture(W, H) {
+    var tc  = document.createElement('canvas');
+    var dpr = Math.min(devicePixelRatio, 2);
+    tc.width  = W * dpr;
+    tc.height = H * dpr;
+    var ctx = tc.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    ctx.fillStyle = CFG.bgColor;
+    ctx.fillRect(0, 0, W, H);
+
+    var grd = ctx.createRadialGradient(W * .55, H * .38, 0, W * .55, H * .38, W * .72);
+    grd.addColorStop(0,   'rgba(160,100,50,.50)');
+    grd.addColorStop(.45, 'rgba(80,40,10,.28)');
+    grd.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+
+    var leg = ctx.createLinearGradient(0, H * .45, 0, H);
+    leg.addColorStop(0, 'rgba(0,0,0,0)');
+    leg.addColorStop(1, 'rgba(0,0,0,.55)');
+    ctx.fillStyle = leg;
+    ctx.fillRect(0, 0, W, H);
+
+    var pad   = Math.round(W * .055);
+    var hSize = Math.round(Math.min(W * .068, 52));
+    var lh    = hSize * 1.08;
+
+    ctx.font         = '400 ' + hSize + 'px "Book Antiqua", Palatino, Georgia, serif';
+    ctx.fillStyle    = '#ffffff';
+    ctx.textBaseline = 'alphabetic';
+
+    var words = CFG.heading.split(' ');
+    var lines = [];
+    var line  = '';
+    for (var wi = 0; wi < words.length; wi++) {
+      var test = line ? line + ' ' + words[wi] : words[wi];
+      if (ctx.measureText(test).width > W - pad * 2 && line) {
+        lines.push(line);
+        line = words[wi];
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+
+    var totalH = lines.length * lh;
+    var headY  = H - Math.round(H * .21) - totalH;
+    for (var li = 0; li < lines.length; li++) {
+      ctx.fillText(lines[li], pad, headY + li * lh);
+    }
+
+    var subSize  = Math.round(Math.min(W * .022, 16));
+    ctx.font      = '200 ' + subSize + 'px "Helvetica Neue", Helvetica, Arial, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,.88)';
+    var subLines  = CFG.subheading.split('\n');
+    var subY      = headY + totalH + subSize * 1.4;
+    for (var si = 0; si < subLines.length; si++) {
+      ctx.fillText(subLines[si], pad, subY + si * subSize * 1.6);
+    }
+
+    return tc.toDataURL('image/webp', 0.92);
+  }
+
+  import('https://cdn.jsdelivr.net/npm/threejs-components@0.0.27/build/backgrounds/liquid1.min.js')
+    .then(function (mod) {
+      var LiquidBackground = mod.default;
+      var W = wrap.offsetWidth  || window.innerWidth;
+      var H = wrap.offsetHeight || window.innerHeight;
+      canvas.width  = W;
+      canvas.height = H;
+
+      var app = LiquidBackground(canvas);
+
+      if (CFG.bgImage) {
+        app.loadImage(CFG.bgImage);
+      } else {
+        app.loadImage(buildTexture(W, H));
+      }
+
+      app.liquidPlane.material.metalness = CFG.metalness;
+      app.liquidPlane.material.roughness = CFG.roughness;
+      app.liquidPlane.uniforms.displacementScale.value = CFG.displacement;
+      app.setRain(false);
+
+      var ro = new ResizeObserver(function () {
+        if (!CFG.bgImage) {
+          app.loadImage(buildTexture(wrap.offsetWidth, wrap.offsetHeight));
+        }
+      });
+      ro.observe(wrap);
+
+      var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      if (mq.matches) app.liquidPlane.uniforms.displacementScale.value = 0;
+    })
+    .catch(function (err) {
+      console.warn('[Soleia Liquid Snippet]', err);
+      wrap.style.background = CFG.bgColor;
+    });
+})();
+</script>

@@ -1,0 +1,248 @@
+{% comment %}
+  ============================================================
+  SOLEIA — Global Liquid Effect
+  File:  sections/soleia-liquid-global.liquid
+  CSS:   assets/soleia-liquid-global.css
+
+  INSTALL (one time only):
+  1. Upload this file  →  sections/soleia-liquid-global.liquid
+  2. Upload the CSS    →  assets/soleia-liquid-global.css
+  3. Open layout/theme.liquid
+  4. Paste just before </body>:
+       {% sections 'soleia-liquid-global' %}
+
+  Done. The effect runs on every page.
+  All controls appear in Customizer → "Liquid Effect" panel.
+
+  LICENCE: threejs-components is CC BY-NC-SA 4.0
+  Commercial use → https://www.framer.com/@kevin-levron/
+  ============================================================
+{% endcomment %}
+
+{%- if section.settings.enabled -%}
+
+{{ 'soleia-liquid-global.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%} Full-viewport canvas — pointer-events:none so page stays usable {%- endcomment -%}
+<canvas
+  id="slg-canvas"
+  aria-hidden="true"
+  data-metalness="{{ section.settings.metalness | times: 0.01 }}"
+  data-roughness="{{ section.settings.roughness | times: 0.01 }}"
+  data-displacement="{{ section.settings.displacement }}"
+  data-rain="{{ section.settings.rain }}"
+  data-rain-count="{{ section.settings.rain_count }}"
+  data-opacity="{{ section.settings.opacity | times: 0.01 }}"
+  data-blend="{{ section.settings.blend_mode }}"
+></canvas>
+
+<script type="module">
+(function () {
+  const canvas = document.getElementById('slg-canvas');
+  if (!canvas) return;
+
+  /* ── Read customizer values ── */
+  const CFG = {
+    metalness:    parseFloat(canvas.dataset.metalness    ?? 0.80),
+    roughness:    parseFloat(canvas.dataset.roughness    ?? 0.20),
+    displacement: parseFloat(canvas.dataset.displacement ?? 4),
+    rain:         canvas.dataset.rain === 'true',
+    rainCount:    parseInt(canvas.dataset.rainCount      ?? 3),
+    opacity:      parseFloat(canvas.dataset.opacity      ?? 0.55),
+    blend:        canvas.dataset.blend || 'screen',
+  };
+
+  /* ── Apply CSS blend + opacity immediately ── */
+  canvas.style.opacity    = CFG.opacity;
+  canvas.style.mixBlendMode = CFG.blend;
+
+  /* ── Build a "mirror" texture: screenshot of what's on the page ──
+     We use html2canvas-style approach: grab the live page as an image
+     using the CSS paint worklet trick — but the most reliable method
+     for cross-origin Shopify pages is to create a gradient-based
+     neutral reflective texture that picks up env-map lighting from
+     Three.js. This makes the liquid look like liquid mercury/chrome
+     floating over your real content.                                ── */
+  function buildReflectiveTexture(W, H) {
+    const tc  = document.createElement('canvas');
+    const dpr = Math.min(devicePixelRatio, 2);
+    tc.width  = W * dpr;
+    tc.height = H * dpr;
+    const ctx = tc.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    /* Neutral gradient that Three.js env-map lighting will colour */
+    const g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0,    '#e8e0d5');
+    g.addColorStop(0.35, '#c8bfb0');
+    g.addColorStop(0.65, '#b0a898');
+    g.addColorStop(1,    '#9a9288');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    /* Radial vignette to concentrate the effect toward centre */
+    const vg = ctx.createRadialGradient(W*.5, H*.5, 0, W*.5, H*.5, Math.max(W,H)*.7);
+    vg.addColorStop(0,   'rgba(255,255,255,.18)');
+    vg.addColorStop(.5,  'rgba(200,190,180,.08)');
+    vg.addColorStop(1,   'rgba(0,0,0,.12)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, W, H);
+
+    return tc.toDataURL('image/webp', 0.9);
+  }
+
+  /* ── Load library + init ── */
+  import('https://cdn.jsdelivr.net/npm/threejs-components@0.0.27/build/backgrounds/liquid1.min.js')
+    .then(({ default: LiquidBackground }) => {
+
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      canvas.width  = W;
+      canvas.height = H;
+
+      const app = LiquidBackground(canvas);
+
+      app.loadImage(buildReflectiveTexture(W, H));
+      app.liquidPlane.material.metalness = CFG.metalness;
+      app.liquidPlane.material.roughness = CFG.roughness;
+      app.liquidPlane.uniforms.displacementScale.value = CFG.displacement;
+      app.setRain(CFG.rain);
+
+      /* Resize */
+      window.addEventListener('resize', () => {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+        app.loadImage(buildReflectiveTexture(window.innerWidth, window.innerHeight));
+      });
+
+      /* Reduced motion */
+      const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      if (mq.matches) {
+        app.liquidPlane.uniforms.displacementScale.value = 0;
+        app.setRain(false);
+      }
+
+      /* Theme editor live reload on settings change */
+      document.addEventListener('shopify:section:load', e => {
+        if (e.detail?.sectionId === '{{ section.id }}') location.reload();
+      });
+
+    })
+    .catch(err => {
+      console.warn('[Soleia Liquid Global] Failed:', err);
+      canvas.style.display = 'none';
+    });
+})();
+</script>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Liquid Effect",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Global Toggle"
+    },
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable Liquid Effect",
+      "default": true,
+      "info": "Turn off to disable the effect across the entire site instantly."
+    },
+    {
+      "type": "header",
+      "content": "Surface Feel"
+    },
+    {
+      "type": "range",
+      "id": "metalness",
+      "label": "Metalness",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80,
+      "info": "Higher = liquid chrome / mirror surface."
+    },
+    {
+      "type": "range",
+      "id": "roughness",
+      "label": "Roughness",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 20,
+      "info": "Lower = sharper glassy reflections. Higher = matte."
+    },
+    {
+      "type": "range",
+      "id": "displacement",
+      "label": "Ripple Intensity",
+      "min": 1,
+      "max": 15,
+      "step": 1,
+      "default": 4,
+      "info": "How strongly the cursor disturbs the surface."
+    },
+    {
+      "type": "header",
+      "content": "Visibility"
+    },
+    {
+      "type": "range",
+      "id": "opacity",
+      "label": "Effect Opacity",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 55,
+      "info": "How visible the liquid layer is over your page content."
+    },
+    {
+      "type": "select",
+      "id": "blend_mode",
+      "label": "Blend Mode",
+      "default": "screen",
+      "options": [
+        { "value": "screen",     "label": "Screen — bright, glass-like" },
+        { "value": "overlay",    "label": "Overlay — rich contrast" },
+        { "value": "soft-light", "label": "Soft Light — subtle sheen" },
+        { "value": "hard-light", "label": "Hard Light — intense" },
+        { "value": "normal",     "label": "Normal — opaque liquid" }
+      ],
+      "info": "Controls how the liquid blends with your page underneath."
+    },
+    {
+      "type": "header",
+      "content": "Ambient Rain"
+    },
+    {
+      "type": "checkbox",
+      "id": "rain",
+      "label": "Auto Rain (idle ripples)",
+      "default": false,
+      "info": "Keeps the surface alive even when the cursor isn't moving."
+    },
+    {
+      "type": "range",
+      "id": "rain_count",
+      "label": "Rain Drop Count",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 3,
+      "info": "How many random drops fall per second. Only active when Rain is enabled."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Liquid Effect"
+    }
+  ]
+}
+{% endschema %}
