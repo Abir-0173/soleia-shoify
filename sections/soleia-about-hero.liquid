@@ -1,13 +1,15 @@
 {% comment %}
-  Soleia — About Hero Section
-  Section: Full-bleed background image, centered label + large heading
+  Soleia — About Hero Section with Liquid Effect INSIDE the section
   File: sections/soleia-about-hero.liquid
 {% endcomment %}
 
 {{ 'section-soleia-about-hero.css' | asset_url | stylesheet_tag }}
 
 <section class="s-about-hero" id="s-about-hero-{{ section.id }}">
-  {%- comment -%} Background Image {%- endcomment -%}
+
+  {%- comment -%}
+    STEP 1 — Background image sits at z-index 0 (bottom layer)
+  {%- endcomment -%}
   <div class="s-about-hero__bg">
     {%- if section.settings.background_image != blank -%}
       <img
@@ -28,10 +30,26 @@
     {%- else -%}
       {{ 'lifestyle-2' | placeholder_svg_tag: 's-about-hero__placeholder' }}
     {%- endif -%}
-    <div class="s-about-hero__overlay"></div>
   </div>
 
-  {%- comment -%} Navigation (shared style with hero) {%- endcomment -%}
+  {%- comment -%}
+    STEP 2 — Liquid canvas at z-index 2, INSIDE the section.
+    The bg image URL is passed as data-bg-image so the liquid
+    shader uses your actual photo as its texture.
+    NO {% render %} call needed — the canvas is right here.
+  {%- endcomment -%}
+  <canvas
+    class="s-about-hero__liquid"
+    id="s-about-liquid-{{ section.id }}"
+    aria-hidden="true"
+    {%- if section.settings.background_image != blank -%}
+      data-bg-image="{{ section.settings.background_image | image_url: width: 1800 }}"
+    {%- endif -%}
+  ></canvas>
+
+  {%- comment -%}
+    STEP 3 — Nav + content at z-index 10 (top layer, always clickable)
+  {%- endcomment -%}
   <header class="s-about-hero__nav">
     <nav class="s-about-hero__nav-inner" role="navigation" aria-label="Main navigation">
       <a
@@ -64,7 +82,6 @@
     </nav>
   </header>
 
-  {%- comment -%} Centered Content {%- endcomment -%}
   <div class="s-about-hero__content">
     {%- if section.settings.label != blank -%}
       <p class="s-about-hero__label">{{ section.settings.label }}</p>
@@ -74,7 +91,74 @@
       <h1 class="s-about-hero__heading">{{ section.settings.heading }}</h1>
     {%- endif -%}
   </div>
+
 </section>
+
+{%- comment -%} Liquid effect script — same library as soleia-liquid-hero {%- endcomment -%}
+<script type="module">
+(function () {
+  var sectionEl = document.getElementById('s-about-hero-{{ section.id }}');
+  var canvas    = document.getElementById('s-about-liquid-{{ section.id }}');
+  if (!canvas || !sectionEl) return;
+
+  var bgImage = canvas.dataset.bgImage || '';
+
+  function buildFallback(W, H) {
+    var tc  = document.createElement('canvas');
+    var dpr = Math.min(devicePixelRatio, 2);
+    tc.width  = W * dpr;
+    tc.height = H * dpr;
+    var ctx = tc.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.fillStyle = '#0f0c08';
+    ctx.fillRect(0, 0, W, H);
+    var grd = ctx.createRadialGradient(W * .55, H * .38, 0, W * .55, H * .38, W * .72);
+    grd.addColorStop(0,   'rgba(160,100,50,.50)');
+    grd.addColorStop(.45, 'rgba(80,40,10,.28)');
+    grd.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+    var leg = ctx.createLinearGradient(0, H * .45, 0, H);
+    leg.addColorStop(0, 'rgba(0,0,0,0)');
+    leg.addColorStop(1, 'rgba(0,0,0,.55)');
+    ctx.fillStyle = leg;
+    ctx.fillRect(0, 0, W, H);
+    return tc.toDataURL('image/webp', 0.9);
+  }
+
+  import('https://cdn.jsdelivr.net/npm/threejs-components@0.0.27/build/backgrounds/liquid1.min.js')
+    .then(function (mod) {
+      var LiquidBackground = mod.default;
+
+      var W = sectionEl.offsetWidth;
+      var H = sectionEl.offsetHeight;
+      canvas.width  = W;
+      canvas.height = H;
+
+      var app = LiquidBackground(canvas);
+
+      /* Use actual bg image as texture so IT gets distorted */
+      app.loadImage(bgImage || buildFallback(W, H));
+      app.liquidPlane.material.metalness = 0.80;
+      app.liquidPlane.material.roughness = 0.20;
+      app.liquidPlane.uniforms.displacementScale.value = 5;
+      app.setRain(false);
+
+      new ResizeObserver(function () {
+        canvas.width  = sectionEl.offsetWidth;
+        canvas.height = sectionEl.offsetHeight;
+        if (!bgImage) app.loadImage(buildFallback(sectionEl.offsetWidth, sectionEl.offsetHeight));
+      }).observe(sectionEl);
+
+      var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      if (mq.matches) app.liquidPlane.uniforms.displacementScale.value = 0;
+    })
+    .catch(function (err) {
+      console.warn('[Soleia About Liquid]', err);
+      canvas.style.display = 'none';
+    });
+})();
+</script>
 
 {% schema %}
 {
@@ -90,17 +174,7 @@
       "type": "image_picker",
       "id": "background_image",
       "label": "Background Image",
-      "info": "Recommended: 2000px wide, dark/moody tone for text legibility."
-    },
-    {
-      "type": "range",
-      "id": "overlay_opacity",
-      "min": 0,
-      "max": 80,
-      "step": 5,
-      "unit": "%",
-      "label": "Overlay Darkness",
-      "default": 45
+      "info": "This image is used as the liquid texture — it gets distorted by the effect."
     },
     {
       "type": "header",
