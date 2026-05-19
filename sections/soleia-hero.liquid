@@ -1,74 +1,73 @@
 {% comment %}
-  Soleia Hero Section — Shopify Liquid
-  Section: Hero with full-bleed background VIDEO, nav, headline, CTA
-  Mobile-first, responsive
+  Soleia Hero Section — Liquid Distortion Version
+  File: sections/soleia-hero.liquid
 {% endcomment %}
 
 {{ 'section-soleia-hero.css' | asset_url | stylesheet_tag }}
 
+<style>
+@font-face {
+  font-family: "CooperLtBTW08-Regular";
+  src:
+    url('{{ "CooperLtBTW08-Regular.woff2" | asset_url }}') format("woff2"),
+    url('{{ "CooperLtBTW08-Regular.woff" | asset_url }}') format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larsseit";
+  src:
+    url('{{ "Larsseit-ExtraLight.woff2" | asset_url }}') format("woff2"),
+    url('{{ "Larsseit-ExtraLight.woff" | asset_url }}') format("woff");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+</style>
+
 <section class="soleia-hero" id="soleia-hero-{{ section.id }}">
-  {%- comment -%} Background Video {%- endcomment -%}
+
   <div class="soleia-hero__bg">
-    {%- if section.settings.video_shopify != blank or section.settings.video_url_mp4 != blank -%}
-      <video
-        class="soleia-hero__video"
-        autoplay
-        muted
-        loop
-        playsinline
-        preload="auto"
-        aria-hidden="true"
-        {%- if section.settings.video_poster != blank -%}
-          poster="{{ section.settings.video_poster | image_url: width: 1800 }}"
-        {%- endif -%}
-      >
-        {%- if section.settings.video_shopify != blank -%}
-          {%- assign hosted_video = section.settings.video_shopify -%}
-          {%- for source in hosted_video.sources -%}
-            <source src="{{ source.url }}" type="{{ source.mime_type }}">
-          {%- endfor -%}
-        {%- elsif section.settings.video_url_mp4 != blank -%}
-          <source src="{{ section.settings.video_url_mp4 }}" type="video/mp4">
-        {%- endif -%}
 
-        {%- comment -%} Image fallback inside <video> for no-JS / unsupported browsers {%- endcomment -%}
-        {%- if section.settings.video_poster != blank -%}
-          <img
-            src="{{ section.settings.video_poster | image_url: width: 1800 }}"
-            width="{{ section.settings.video_poster.width }}"
-            height="{{ section.settings.video_poster.height }}"
-            alt="Hero background"
-          >
-        {%- endif -%}
-      </video>
-
-    {%- elsif section.settings.video_poster != blank -%}
-      {%- comment -%} No video — show poster image only {%- endcomment -%}
+    {% if section.settings.hero_image != blank %}
       <img
-        class="soleia-hero__video-fallback"
-        src="{{ section.settings.video_poster | image_url: width: 1800 }}"
+        class="soleia-hero__bg-image"
+        src="{{ section.settings.hero_image | image_url: width: 2000 }}"
         srcset="
-          {{ section.settings.video_poster | image_url: width: 600 }} 600w,
-          {{ section.settings.video_poster | image_url: width: 1200 }} 1200w,
-          {{ section.settings.video_poster | image_url: width: 1800 }} 1800w
+          {{ section.settings.hero_image | image_url: width: 600 }} 600w,
+          {{ section.settings.hero_image | image_url: width: 1000 }} 1000w,
+          {{ section.settings.hero_image | image_url: width: 1400 }} 1400w,
+          {{ section.settings.hero_image | image_url: width: 2000 }} 2000w
         "
         sizes="100vw"
-        width="{{ section.settings.video_poster.width }}"
-        height="{{ section.settings.video_poster.height }}"
-        alt="{{ section.settings.video_poster.alt | escape }}"
+        width="{{ section.settings.hero_image.width }}"
+        height="{{ section.settings.hero_image.height }}"
+        alt="{{ section.settings.hero_image.alt | escape }}"
         loading="eager"
         fetchpriority="high"
       >
-    {%- else -%}
+    {% else %}
       {{ 'lifestyle-1' | placeholder_svg_tag: 'soleia-hero__placeholder' }}
-    {%- endif -%}
+    {% endif %}
 
-    <div class="soleia-hero__overlay"></div>
   </div>
 
-  {%- comment -%} Navigation {%- endcomment -%}
+  <canvas
+    class="soleia-hero__liquid"
+    id="soleia-liquid-{{ section.id }}"
+    aria-hidden="true"
+    {% if section.settings.hero_image != blank %}
+      data-bg-image="{{ section.settings.hero_image | image_url: width: 1800 }}"
+    {% endif %}
+  ></canvas>
+
+  <div class="soleia-hero__overlay"></div>
+
   <header class="soleia-hero__nav">
     <nav class="soleia-hero__nav-inner" role="navigation" aria-label="Hero navigation">
+
       <a
         href="{{ section.settings.nav_left_url | default: routes.root_url }}"
         class="soleia-hero__nav-link soleia-hero__nav-link--left"
@@ -77,50 +76,63 @@
       </a>
 
       <a href="{{ routes.root_url }}" class="soleia-hero__logo" aria-label="{{ shop.name }}">
-        {%- if section.settings.logo != blank -%}
+
+        {% if section.settings.logo != blank %}
           <img
             src="{{ section.settings.logo | image_url: width: 240 }}"
             alt="{{ shop.name }}"
-            width="120"
-            height=""
+            width="{{ section.settings.logo.width }}"
+            height="{{ section.settings.logo.height }}"
             loading="eager"
           >
-        {%- else -%}
-          <span class="soleia-hero__logo-text">{{ section.settings.logo_text | default: shop.name }}</span>
-        {%- endif -%}
+        {% else %}
+          <span class="soleia-hero__logo-text">
+            {{ section.settings.logo_text | default: shop.name }}
+          </span>
+        {% endif %}
+
       </a>
 
       <a
-        href="{{ section.settings.nav_right_url | default: routes.root_url | append: 'pages/contact' }}"
+        href="{{ section.settings.nav_right_url | default: routes.root_url }}"
         class="soleia-hero__nav-link soleia-hero__nav-link--right"
       >
         {{ section.settings.nav_right | default: 'Contact' | upcase }}
       </a>
+
     </nav>
   </header>
 
-  {%- comment -%} Hero Content {%- endcomment -%}
   <div class="soleia-hero__content">
+
     <div class="soleia-hero__content-inner">
+
       <div class="soleia-hero__text">
-        {%- if section.settings.heading != blank -%}
-          <h1 class="soleia-hero__heading">{{ section.settings.heading }}</h1>
-        {%- endif -%}
 
-      {%- if section.settings.subheading != blank -%}
-        <p class="soleia-hero__subheading">{{ section.settings.subheading }}</p>
-      {%- endif -%}
+        {% if section.settings.heading != blank %}
+          <h1 class="soleia-hero__heading">
+            {{ section.settings.heading }}
+          </h1>
+        {% endif %}
 
-      {%- if section.settings.cta_label != blank -%}
-        <a
-          href="{{ section.settings.cta_url | default: '#waitlist' }}"
-          class="soleia-hero__cta"
-        >
-          {{ section.settings.cta_label | upcase }}
-        </a>
-      {%- endif -%}
+        {% if section.settings.subheading != blank %}
+          <p class="soleia-hero__subheading">
+            {{ section.settings.subheading }}
+          </p>
+        {% endif %}
+
+        {% if section.settings.cta_label != blank %}
+          <a
+            href="{{ section.settings.cta_url | default: '#waitlist' }}"
+            class="soleia-hero__cta"
+          >
+            {{ section.settings.cta_label | upcase }}
+          </a>
+        {% endif %}
+
       </div>
-      {%- if section.settings.instagram_url != blank -%}
+
+      {% if section.settings.instagram_url != blank %}
         <a
           href="{{ section.settings.instagram_url }}"
           class="soleia-hero__social"
@@ -145,37 +157,105 @@
             <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
           </svg>
         </a>
-      {%- endif -%}
+      {% endif %}
+
     </div>
-    {%- comment -%} Instagram Icon — Bottom Right {%- endcomment -%}
+
   </div>
 
 </section>
 
-{%- comment -%}
-  Pause video for users who prefer reduced motion (accessibility)
-{%- endcomment -%}
-<script>
-  (function () {
-    var section = document.getElementById('soleia-hero-{{ section.id }}');
-    if (!section) return;
-    var video = section.querySelector('.soleia-hero__video');
-    if (!video) return;
+<script type="module">
+(() => {
 
-    // Respect prefers-reduced-motion
-    var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (mq.matches) {
-      video.pause();
-    }
-    mq.addEventListener('change', function (e) {
-      e.matches ? video.pause() : video.play();
+  const sectionEl = document.getElementById('soleia-hero-{{ section.id }}');
+  const canvas = document.getElementById('soleia-liquid-{{ section.id }}');
+
+  if (!sectionEl || !canvas) return;
+
+  const bgImage = canvas.dataset.bgImage || '';
+
+  function resizeCanvas() {
+    canvas.width = sectionEl.offsetWidth;
+    canvas.height = sectionEl.offsetHeight;
+  }
+
+  resizeCanvas();
+
+  function buildFallback(W, H) {
+
+    const tc = document.createElement('canvas');
+    const dpr = Math.min(devicePixelRatio, 2);
+
+    tc.width = W * dpr;
+    tc.height = H * dpr;
+
+    const ctx = tc.getContext('2d');
+
+    ctx.scale(dpr, dpr);
+
+    ctx.fillStyle = '#120d09';
+    ctx.fillRect(0, 0, W, H);
+
+    const grd = ctx.createRadialGradient(
+      W * 0.5,
+      H * 0.35,
+      0,
+      W * 0.5,
+      H * 0.35,
+      W * 0.7
+    );
+
+    grd.addColorStop(0, 'rgba(170,120,70,.50)');
+    grd.addColorStop(.45, 'rgba(90,40,10,.30)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+
+    return tc.toDataURL('image/webp', 0.92);
+  }
+
+  import('https://cdn.jsdelivr.net/npm/threejs-components@0.0.27/build/backgrounds/liquid1.min.js')
+    .then((mod) => {
+
+      const LiquidBackground = mod.default;
+
+      const app = LiquidBackground(canvas);
+
+      app.loadImage(
+        bgImage || buildFallback(
+          sectionEl.offsetWidth,
+          sectionEl.offsetHeight
+        )
+      );
+
+      app.liquidPlane.material.metalness = 0.8;
+      app.liquidPlane.material.roughness = 0.2;
+
+      app.liquidPlane.uniforms.displacementScale.value = 5;
+
+      app.setRain(false);
+
+      const resizeObserver = new ResizeObserver(() => {
+        resizeCanvas();
+      });
+
+      resizeObserver.observe(sectionEl);
+
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      if (reducedMotion.matches) {
+        app.liquidPlane.uniforms.displacementScale.value = 0;
+      }
+
+    })
+    .catch((err) => {
+      console.warn('[SOLEIA HERO LIQUID]', err);
+      canvas.style.display = 'none';
     });
 
-    // Ensure autoplay on mobile (some browsers require explicit play() after user gesture)
-    video.play().catch(function () {
-      // Autoplay blocked — video stays on poster frame, that's fine
-    });
-  })();
+})();
 </script>
 
 {% schema %}
@@ -185,36 +265,9 @@
   "class": "soleia-section",
   "settings": [
     {
-      "type": "header",
-      "content": "Background Video"
-    },
-    {
-      "type": "video",
-      "id": "video_shopify",
-      "label": "Video — Shopify Hosted (recommended)",
-      "info": "Upload an MP4 directly to Shopify. Best for performance and CDN delivery."
-    },
-    {
-      "type": "text",
-      "id": "video_url_mp4",
-      "label": "Video URL — External MP4 (CDN fallback)",
-      "info": "Use only if hosting externally. e.g. https://cdn.yoursite.com/hero.mp4"
-    },
-    {
       "type": "image_picker",
-      "id": "video_poster",
-      "label": "Poster / Fallback Image",
-      "info": "Shown while the video loads and on devices that cannot autoplay video."
-    },
-    {
-      "type": "range",
-      "id": "overlay_opacity",
-      "min": 0,
-      "max": 80,
-      "step": 5,
-      "unit": "%",
-      "label": "Overlay Darkness",
-      "default": 35
+      "id": "hero_image",
+      "label": "Hero Background Image"
     },
     {
       "type": "header",
@@ -223,12 +276,12 @@
     {
       "type": "image_picker",
       "id": "logo",
-      "label": "Logo Image (overrides text logo below)"
+      "label": "Logo Image"
     },
     {
       "type": "text",
       "id": "logo_text",
-      "label": "Logo Text (used if no image set)",
+      "label": "Logo Text",
       "default": "soleia"
     },
     {
@@ -267,22 +320,18 @@
       "type": "textarea",
       "id": "subheading",
       "label": "Subheading",
-      "default": "Plastic-free tea strips that dissolve in seconds. Pure flavour, functional botanicals, zero waste"
+      "default": "Plastic-free tea strips that dissolve in seconds."
     },
     {
       "type": "text",
       "id": "cta_label",
-      "label": "CTA Button Label",
-      "default": "Join the Waitlist"
+      "label": "CTA Label",
+      "default": "Join Waitlist"
     },
     {
       "type": "url",
       "id": "cta_url",
-      "label": "CTA Button URL"
-    },
-    {
-      "type": "header",
-      "content": "Social"
+      "label": "CTA URL"
     },
     {
       "type": "url",
