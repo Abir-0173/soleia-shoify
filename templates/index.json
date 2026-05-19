@@ -1,1 +1,28 @@
-{"sections":{"soleia_hero_JVwfnP":{"type":"soleia-hero","name":"Soleia Hero","settings":{"video_shopify":"shopify:\/\/files\/videos\/8507719-hd_1920_1080_25fps.mp4","video_url_mp4":"","overlay_opacity":35,"logo":"shopify:\/\/shop_images\/fdfaf5.png","logo_text":"soleia","nav_left":"About","nav_left_url":"shopify:\/\/pages\/about-us","nav_right":"Contact","nav_right_url":"#","heading":"A new format for modern tea","subheading":"Plastic-free tea strips that dissolve in seconds. Pure flavour, functional botanicals, zero waste","cta_label":"Join the Waitlist","cta_url":"","instagram_url":"https:\/\/instagram.com"}},"soleia_liquid_global_8ErpMt":{"type":"soleia-liquid-global","name":"Liquid Effect","settings":{"enabled":true,"metalness":80,"roughness":20,"displacement":4,"opacity":55,"blend_mode":"soft-light","rain":false,"rain_count":3}}},"order":["soleia_hero_JVwfnP","soleia_liquid_global_8ErpMt"]}
+{
+  "sections": {
+    "soleia_hero_JVwfnP": {
+      "type": "soleia-hero",
+      "name": "Soleia Hero",
+      "settings": {
+        "video_url_mp4": "",
+        "enable_liquid_effect": true,
+        "liquid_displacement": 5,
+        "liquid_metalness": 75,
+        "liquid_roughness": 25,
+        "liquid_rain": false,
+        "logo": "shopify://shop_images/fdfaf5.png",
+        "logo_text": "soleia",
+        "nav_left": "About",
+        "nav_left_url": "shopify://pages/about-us",
+        "nav_right": "Contact",
+        "nav_right_url": "#",
+        "heading": "A new format for modern tea",
+        "subheading": "Plastic-free tea strips that dissolve in seconds. Pure flavour, functional botanicals, zero waste",
+        "cta_label": "Join the Waitlist",
+        "cta_url": "",
+        "instagram_url": "https://instagram.com"
+      }
+    }
+  },
+  "order": ["soleia_hero_JVwfnP"]
+}

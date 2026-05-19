@@ -16,25 +16,33 @@
 */
 
 @font-face {
-  font-family: 'CooperLtBTW08-Regular';
-  src: url('{{ "CooperLtBTW08-Regular.woff2" | asset_url }}') format('woff2'),
-       url('{{ "CooperLtBTW08-Regular.woff" | asset_url }}') format('woff');
+  font-family: "CooperLtBTW08-Regular";
+  src:
+    url('{{ "CooperLtBTW08-Regular.woff2" | asset_url }}') format("woff2"),
+    url('{{ "CooperLtBTW08-Regular.woff" | asset_url }}') format("woff");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Larsseit';
-  src: url('{{ "Larsseit-ExtraLight.woff2" | asset_url }}') format('woff2'),
-       url('{{ "Larsseit-ExtraLight.woff" | asset_url }}') format('woff');
+  font-family: "Larsseit";
+  src:
+    url('{{ "Larsseit-ExtraLight.woff2" | asset_url }}') format("woff2"),
+    url('{{ "Larsseit-ExtraLight.woff" | asset_url }}') format("woff");
   font-weight: 200;
   font-style: normal;
   font-display: swap;
 }
 
 /* ---- Reset ---- */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 /* ---- Section Container ---- */
 .soleia-hero {
@@ -42,6 +50,7 @@
   width: 100%;
   height: 100svh;
   min-height: 560px;
+
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -117,7 +126,7 @@
 
 /* Nav links — DM Mono 300, exact Figma spec */
 .soleia-hero__nav-link {
-  font-family: 'DM Mono', monospace;
+  font-family: "DM Mono", monospace;
   font-size: 14px;
   font-style: normal;
   font-weight: 300;
@@ -129,9 +138,15 @@
   transition: opacity 0.2s ease;
 }
 
-.soleia-hero__nav-link:hover   { opacity: 0.6; }
-.soleia-hero__nav-link--left   { justify-self: start; }
-.soleia-hero__nav-link--right  { justify-self: end; }
+.soleia-hero__nav-link:hover {
+  opacity: 0.6;
+}
+.soleia-hero__nav-link--left {
+  justify-self: start;
+}
+.soleia-hero__nav-link--right {
+  justify-self: end;
+}
 
 /* ---- Logo ---- */
 .soleia-hero__logo {
@@ -150,7 +165,7 @@
 
 /* Logo wordmark — keep its own italic serif style */
 .soleia-hero__logo-text {
-  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
   font-size: 32px;
   font-weight: 400;
   letter-spacing: 0.04em;
@@ -164,13 +179,19 @@
   position: relative;
   z-index: 10;
   flex: 1;
+  width: 100%;
+  padding: 28px 40px;
+  align-self: stretch;
+}
+
+.soleia-hero__content-inner {
+  position: relative;
   display: flex;
   align-items: flex-end;
-  padding: 0 40px 52px;
   max-width: 1440px;
   width: 100%;
   margin: 0 auto;
-  align-self: stretch;
+  height: 100%;
 }
 
 .soleia-hero__text {
@@ -183,7 +204,7 @@
 /* Heading — CooperLtBTW08-Regular, exact Figma spec */
 .soleia-hero__heading {
   color: #ffffff;
-  font-family: 'CooperLtBTW08-Regular', Georgia, serif;
+  font-family: "CooperLtBTW08-Regular", Georgia, serif;
   font-size: 48px;
   font-style: normal;
   font-weight: 400;
@@ -194,7 +215,7 @@
 /* Subheading — Larsseit 200, exact Figma spec */
 .soleia-hero__subheading {
   color: #ffffff;
-  font-family: 'Larsseit', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: "Larsseit", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 16px;
   font-style: normal;
   font-weight: 200;
@@ -211,7 +232,7 @@
   padding: 16px 28px;
   background-color: #ffffff;
   color: #000000;
-  font-family: 'DM Mono', monospace;
+  font-family: "DM Mono", monospace;
   font-size: 14px;
   font-style: normal;
   font-weight: 300;
@@ -225,7 +246,9 @@
   border-radius: 0;
   align-self: flex-start;
   margin-top: 4px;
-  transition: background-color 0.22s ease, transform 0.15s ease;
+  transition:
+    background-color 0.22s ease,
+    transform 0.15s ease;
 }
 
 .soleia-hero__cta:hover {
@@ -237,11 +260,11 @@
   transform: translateY(0);
 }
 
-/* ---- Instagram Icon — Bottom Right ---- */
+/* ---- Instagram Icon — Bottom Right (within padded content-inner) ---- */
 .soleia-hero__social {
   position: absolute;
-  bottom: 40px;
-  right: 40px;
+  right: 0;
+  bottom: 0;
   z-index: 10;
   width: 46px;
   height: 46px;
@@ -252,7 +275,9 @@
   border-radius: 8px;
   color: #ffffff;
   text-decoration: none;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .soleia-hero__social:hover {
@@ -266,25 +291,45 @@
 
 /* ---- Tablet (≤ 768px) ---- */
 @media screen and (max-width: 768px) {
-  .soleia-hero__nav      { padding: 22px 24px; }
-  .soleia-hero__logo img { height: 30px; }
-  .soleia-hero__logo-text { font-size: 26px; }
-  .soleia-hero__content  { padding: 0 24px 44px; }
-  .soleia-hero__text     { max-width: 100%; gap: 16px; }
+  .soleia-hero__nav {
+    padding: 22px 24px;
+  }
+  .soleia-hero__logo img {
+    height: 30px;
+  }
+  .soleia-hero__logo-text {
+    font-size: 26px;
+  }
+  .soleia-hero__content {
+    padding: 22px 24px;
+  }
+  .soleia-hero__text {
+    max-width: 100%;
+    gap: 16px;
+  }
 
   .soleia-hero__heading {
     font-size: 40px;
     /* line-height 92% stays the same */
   }
 
-  .soleia-hero__subheading { max-width: 100%; }
-  .soleia-hero__social     { bottom: 28px; right: 24px; width: 40px; height: 40px; }
+  .soleia-hero__subheading {
+    max-width: 100%;
+  }
+  .soleia-hero__social {
+    width: 40px;
+    height: 40px;
+  }
 }
 
 /* ---- Mobile (≤ 480px) ---- */
 @media screen and (max-width: 480px) {
-  .soleia-hero         { min-height: 100svh; }
-  .soleia-hero__nav    { padding: 18px 20px; }
+  .soleia-hero {
+    min-height: 100svh;
+  }
+  .soleia-hero__nav {
+    padding: 18px 20px;
+  }
 
   /* Nav — scale font slightly for small screens */
   .soleia-hero__nav-link {
@@ -292,10 +337,18 @@
     letter-spacing: 0.8px;
   }
 
-  .soleia-hero__logo-text { font-size: 22px; }
-  .soleia-hero__logo img  { height: 26px; }
-  .soleia-hero__content   { padding: 0 20px 36px; }
-  .soleia-hero__text      { gap: 14px; }
+  .soleia-hero__logo-text {
+    font-size: 22px;
+  }
+  .soleia-hero__logo img {
+    height: 26px;
+  }
+  .soleia-hero__content {
+    padding: 18px 20px;
+  }
+  .soleia-hero__text {
+    gap: 14px;
+  }
 
   .soleia-hero__heading {
     font-size: 32px;
@@ -315,19 +368,20 @@
   }
 
   .soleia-hero__social {
-    bottom: 24px;
-    right: 20px;
     width: 38px;
     height: 38px;
     border-radius: 7px;
   }
 
-  .soleia-hero__social svg { width: 17px; height: 17px; }
+  .soleia-hero__social svg {
+    width: 17px;
+    height: 17px;
+  }
 
   .soleia-hero__overlay {
     background: linear-gradient(
       to bottom,
-      rgba(10, 5, 3, 0.20) 0%,
+      rgba(10, 5, 3, 0.2) 0%,
       rgba(10, 5, 3, 0.08) 35%,
       rgba(10, 5, 3, 0.65) 100%
     );
@@ -336,21 +390,33 @@
 
 /* ---- Extra Small (≤ 360px) ---- */
 @media screen and (max-width: 360px) {
-  .soleia-hero__heading   { font-size: 28px; }
-  .soleia-hero__nav-link  { font-size: 10px; letter-spacing: 0.7px; }
-  .soleia-hero__logo-text { font-size: 20px; }
+  .soleia-hero__heading {
+    font-size: 28px;
+  }
+  .soleia-hero__nav-link {
+    font-size: 10px;
+    letter-spacing: 0.7px;
+  }
+  .soleia-hero__logo-text {
+    font-size: 20px;
+  }
 }
 
 /* ---- Large / 4K (≥ 1440px) ---- */
 @media screen and (min-width: 1440px) {
-  .soleia-hero__nav     { padding: 36px 60px; }
-  .soleia-hero__content { padding: 0 60px 68px; }
-  .soleia-hero__social  { right: 60px; bottom: 52px; }
+  .soleia-hero__nav {
+    padding: 36px 60px;
+  }
+  .soleia-hero__content {
+    padding: 0 60px 60px;
+  }
 }
 
 /* ---- Accessibility ---- */
 @media (prefers-reduced-motion: reduce) {
   .soleia-hero__cta,
   .soleia-hero__nav-link,
-  .soleia-hero__social { transition: none; }
+  .soleia-hero__social {
+    transition: none;
+  }
 }
