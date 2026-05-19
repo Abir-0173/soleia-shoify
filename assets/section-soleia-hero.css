@@ -6,6 +6,29 @@
   padding: 0;
 }
 
+
+
+.soleia-hero__liquid {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 2;
+  display: block;
+  pointer-events: all;
+  cursor: crosshair;
+}
+
+.soleia-hero__overlay {
+  z-index: 3;
+}
+
+
+
+
+
+
+
 .soleia-hero {
   position: relative;
   width: 100%;
