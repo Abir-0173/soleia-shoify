@@ -1,6 +1,6 @@
 {% comment %}
-  Soleia Hero Section — Liquid Distortion Version
-  File: sections/soleia-hero.liquid
+  Soleia Hero Section — Shopify Liquid
+  Hero with video + liquid distortion effect
 {% endcomment %}
 
 {{ 'section-soleia-hero.css' | asset_url | stylesheet_tag }}
@@ -31,42 +31,92 @@
 
   <div class="soleia-hero__bg">
 
-    {% if section.settings.hero_image != blank %}
+    {% if section.settings.video_shopify != blank or section.settings.video_url_mp4 != blank %}
+
+      <video
+        class="soleia-hero__video"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+        aria-hidden="true"
+        {% if section.settings.video_poster != blank %}
+          poster="{{ section.settings.video_poster | image_url: width: 1800 }}"
+        {% endif %}
+      >
+
+        {% if section.settings.video_shopify != blank %}
+          {% assign hosted_video = section.settings.video_shopify %}
+
+          {% for source in hosted_video.sources %}
+            <source src="{{ source.url }}" type="{{ source.mime_type }}">
+          {% endfor %}
+
+        {% elsif section.settings.video_url_mp4 != blank %}
+
+          <source
+            src="{{ section.settings.video_url_mp4 }}"
+            type="video/mp4"
+          >
+
+        {% endif %}
+
+        {% if section.settings.video_poster != blank %}
+          <img
+            src="{{ section.settings.video_poster | image_url: width: 1800 }}"
+            width="{{ section.settings.video_poster.width }}"
+            height="{{ section.settings.video_poster.height }}"
+            alt="Hero background"
+          >
+        {% endif %}
+
+      </video>
+
+    {% elsif section.settings.video_poster != blank %}
+
       <img
-        class="soleia-hero__bg-image"
-        src="{{ section.settings.hero_image | image_url: width: 2000 }}"
+        class="soleia-hero__video-fallback"
+        src="{{ section.settings.video_poster | image_url: width: 1800 }}"
         srcset="
-          {{ section.settings.hero_image | image_url: width: 600 }} 600w,
-          {{ section.settings.hero_image | image_url: width: 1000 }} 1000w,
-          {{ section.settings.hero_image | image_url: width: 1400 }} 1400w,
-          {{ section.settings.hero_image | image_url: width: 2000 }} 2000w
+          {{ section.settings.video_poster | image_url: width: 600 }} 600w,
+          {{ section.settings.video_poster | image_url: width: 1200 }} 1200w,
+          {{ section.settings.video_poster | image_url: width: 1800 }} 1800w
         "
         sizes="100vw"
-        width="{{ section.settings.hero_image.width }}"
-        height="{{ section.settings.hero_image.height }}"
-        alt="{{ section.settings.hero_image.alt | escape }}"
+        width="{{ section.settings.video_poster.width }}"
+        height="{{ section.settings.video_poster.height }}"
+        alt="{{ section.settings.video_poster.alt | escape }}"
         loading="eager"
         fetchpriority="high"
       >
+
     {% else %}
+
       {{ 'lifestyle-1' | placeholder_svg_tag: 'soleia-hero__placeholder' }}
+
     {% endif %}
+
+    <div class="soleia-hero__overlay"></div>
+
+    <canvas
+      class="soleia-hero__liquid"
+      id="soleia-liquid-{{ section.id }}"
+      aria-hidden="true"
+      {% if section.settings.video_poster != blank %}
+        data-bg-image="{{ section.settings.video_poster | image_url: width: 1800 }}"
+      {% endif %}
+    ></canvas>
 
   </div>
 
-  <canvas
-    class="soleia-hero__liquid"
-    id="soleia-liquid-{{ section.id }}"
-    aria-hidden="true"
-    {% if section.settings.hero_image != blank %}
-      data-bg-image="{{ section.settings.hero_image | image_url: width: 1800 }}"
-    {% endif %}
-  ></canvas>
-
-  <div class="soleia-hero__overlay"></div>
-
   <header class="soleia-hero__nav">
-    <nav class="soleia-hero__nav-inner" role="navigation" aria-label="Hero navigation">
+
+    <nav
+      class="soleia-hero__nav-inner"
+      role="navigation"
+      aria-label="Hero navigation"
+    >
 
       <a
         href="{{ section.settings.nav_left_url | default: routes.root_url }}"
@@ -75,32 +125,40 @@
         {{ section.settings.nav_left | default: 'About' | upcase }}
       </a>
 
-      <a href="{{ routes.root_url }}" class="soleia-hero__logo" aria-label="{{ shop.name }}">
+      <a
+        href="{{ routes.root_url }}"
+        class="soleia-hero__logo"
+        aria-label="{{ shop.name }}"
+      >
 
         {% if section.settings.logo != blank %}
+
           <img
             src="{{ section.settings.logo | image_url: width: 240 }}"
             alt="{{ shop.name }}"
-            width="{{ section.settings.logo.width }}"
-            height="{{ section.settings.logo.height }}"
+            width="120"
             loading="eager"
           >
+
         {% else %}
+
           <span class="soleia-hero__logo-text">
             {{ section.settings.logo_text | default: shop.name }}
           </span>
+
         {% endif %}
 
       </a>
 
       <a
-        href="{{ section.settings.nav_right_url | default: routes.root_url }}"
+        href="{{ section.settings.nav_right_url | default: routes.root_url | append: 'pages/contact' }}"
         class="soleia-hero__nav-link soleia-hero__nav-link--right"
       >
         {{ section.settings.nav_right | default: 'Contact' | upcase }}
       </a>
 
     </nav>
+
   </header>
 
   <div class="soleia-hero__content">
@@ -133,6 +191,7 @@
       </div>
 
       {% if section.settings.instagram_url != blank %}
+
         <a
           href="{{ section.settings.instagram_url }}"
           class="soleia-hero__social"
@@ -140,6 +199,7 @@
           target="_blank"
           rel="noopener noreferrer"
         >
+
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -156,7 +216,9 @@
             <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
             <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
           </svg>
+
         </a>
+
       {% endif %}
 
     </div>
@@ -164,6 +226,34 @@
   </div>
 
 </section>
+
+<script>
+(function () {
+
+  var section = document.getElementById('soleia-hero-{{ section.id }}');
+
+  if (!section) return;
+
+  var video = section.querySelector('.soleia-hero__video');
+
+  if (!video) return;
+
+  var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (mq.matches) {
+    video.pause();
+  }
+
+  mq.addEventListener('change', function (e) {
+    e.matches ? video.pause() : video.play();
+  });
+
+  video.play().catch(function () {
+    // autoplay blocked
+  });
+
+})();
+</script>
 
 <script type="module">
 (() => {
@@ -182,40 +272,6 @@
 
   resizeCanvas();
 
-  function buildFallback(W, H) {
-
-    const tc = document.createElement('canvas');
-    const dpr = Math.min(devicePixelRatio, 2);
-
-    tc.width = W * dpr;
-    tc.height = H * dpr;
-
-    const ctx = tc.getContext('2d');
-
-    ctx.scale(dpr, dpr);
-
-    ctx.fillStyle = '#120d09';
-    ctx.fillRect(0, 0, W, H);
-
-    const grd = ctx.createRadialGradient(
-      W * 0.5,
-      H * 0.35,
-      0,
-      W * 0.5,
-      H * 0.35,
-      W * 0.7
-    );
-
-    grd.addColorStop(0, 'rgba(170,120,70,.50)');
-    grd.addColorStop(.45, 'rgba(90,40,10,.30)');
-    grd.addColorStop(1, 'rgba(0,0,0,0)');
-
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, W, H);
-
-    return tc.toDataURL('image/webp', 0.92);
-  }
-
   import('https://cdn.jsdelivr.net/npm/threejs-components@0.0.27/build/backgrounds/liquid1.min.js')
     .then((mod) => {
 
@@ -223,12 +279,7 @@
 
       const app = LiquidBackground(canvas);
 
-      app.loadImage(
-        bgImage || buildFallback(
-          sectionEl.offsetWidth,
-          sectionEl.offsetHeight
-        )
-      );
+      app.loadImage(bgImage);
 
       app.liquidPlane.material.metalness = 0.8;
       app.liquidPlane.material.roughness = 0.2;
@@ -265,9 +316,23 @@
   "class": "soleia-section",
   "settings": [
     {
+      "type": "header",
+      "content": "Background Video"
+    },
+    {
+      "type": "video",
+      "id": "video_shopify",
+      "label": "Video — Shopify Hosted"
+    },
+    {
+      "type": "text",
+      "id": "video_url_mp4",
+      "label": "External MP4 URL"
+    },
+    {
       "type": "image_picker",
-      "id": "hero_image",
-      "label": "Hero Background Image"
+      "id": "video_poster",
+      "label": "Poster Image"
     },
     {
       "type": "header",
@@ -276,7 +341,7 @@
     {
       "type": "image_picker",
       "id": "logo",
-      "label": "Logo Image"
+      "label": "Logo"
     },
     {
       "type": "text",
@@ -287,7 +352,7 @@
     {
       "type": "text",
       "id": "nav_left",
-      "label": "Left Nav Label",
+      "label": "Left Nav",
       "default": "About"
     },
     {
@@ -298,7 +363,7 @@
     {
       "type": "text",
       "id": "nav_right",
-      "label": "Right Nav Label",
+      "label": "Right Nav",
       "default": "Contact"
     },
     {
