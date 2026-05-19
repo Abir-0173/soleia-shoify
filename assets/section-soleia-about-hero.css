@@ -1,0 +1,176 @@
+/* ==========================================================================
+   Soleia About Hero — section-soleia-about-hero.css
+   ========================================================================== */
+
+@font-face {
+  font-family: 'CooperLtBTW08-Regular';
+  src: url('{{ "CooperLtBTW08-Regular.woff2" | asset_url }}') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Section container ── */
+.s-about-hero {
+  position: relative;    /* required — all absolute children stack inside here */
+  width: 100%;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  color: #ffffff;
+}
+
+/* ── LAYER 0 — Background image ── */
+.s-about-hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.s-about-hero__bg img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+.s-about-hero__placeholder {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #1a100a;
+}
+
+/* ── LAYER 2 — Liquid canvas (effect lives here) ── */
+.s-about-hero__liquid {
+  position: absolute;
+  inset: 0;
+  width:  100% !important;
+  height: 100% !important;
+  z-index: 2;
+  display: block;
+  pointer-events: all;   /* mouse/touch reaches canvas for ripples */
+  cursor: crosshair;
+}
+
+/* ── LAYER 10 — Nav (always on top, always clickable) ── */
+.s-about-hero__nav {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  padding: 28px 40px;
+  pointer-events: none;
+}
+.s-about-hero__nav-inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+.s-about-hero__nav-link,
+.s-about-hero__logo { pointer-events: all; }
+
+.s-about-hero__nav-link {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: normal;
+  letter-spacing: 1.12px;
+  text-transform: uppercase;
+  color: #fff;
+  text-decoration: none;
+  transition: opacity .2s ease;
+}
+.s-about-hero__nav-link:hover  { opacity: .6; }
+.s-about-hero__nav-link--left  { justify-self: start; }
+.s-about-hero__nav-link--right { justify-self: end; }
+
+.s-about-hero__logo {
+  justify-self: center;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+.s-about-hero__logo img { height: 38px; width: auto; object-fit: contain; }
+.s-about-hero__logo-text {
+  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: .04em;
+  color: #fff;
+  font-style: italic;
+  line-height: 1;
+}
+
+/* ── LAYER 10 — Content (always on top) ── */
+.s-about-hero__content {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 80px;
+  text-align: center;
+  gap: 28px;
+  pointer-events: none;
+}
+
+.s-about-hero__label {
+  color: #fff;
+  font-family: 'DM Mono', monospace;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: normal;
+  letter-spacing: 5.12px;
+  text-transform: uppercase;
+}
+
+.s-about-hero__heading {
+  color: #fff;
+  font-family: 'CooperLtBTW08-Regular', Georgia, serif;
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 92%;
+  letter-spacing: -0.48px;
+  max-width: 1080px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .s-about-hero__nav     { padding: 22px 24px; }
+  .s-about-hero__logo img { height: 30px; }
+  .s-about-hero__logo-text { font-size: 26px; }
+  .s-about-hero__content  { padding: 40px; gap: 20px; }
+  .s-about-hero__label    { font-size: 13px; letter-spacing: 4px; }
+  .s-about-hero__heading  { font-size: 36px; }
+}
+
+@media (max-width: 480px) {
+  .s-about-hero          { min-height: 100svh; }
+  .s-about-hero__nav     { padding: 18px 20px; }
+  .s-about-hero__nav-link { font-size: 10px; letter-spacing: .7px; }
+  .s-about-hero__logo img  { height: 26px; }
+  .s-about-hero__logo-text { font-size: 22px; }
+  .s-about-hero__content   { padding: 24px; gap: 16px; }
+  .s-about-hero__label     { font-size: 11px; letter-spacing: 3px; }
+  .s-about-hero__heading   { font-size: 26px; }
+}
+
+@media (min-width: 1440px) {
+  .s-about-hero__nav     { padding: 36px 60px; }
+  .s-about-hero__content { padding: 60px 100px; }
+  .s-about-hero__heading { font-size: 64px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s-about-hero__nav-link { transition: none; }
+}
